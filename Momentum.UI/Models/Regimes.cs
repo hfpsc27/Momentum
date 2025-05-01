@@ -17,6 +17,6 @@ public partial class Regimes
     [Required]
     public string Nome { get; set; }
 
-    [InverseProperty("Regime")]
-    public virtual ICollection<UCDocenteMomento> UCDocenteMomento { get; set; } = new List<UCDocenteMomento>();
+    //[InverseProperty("Regime")]
+    //public virtual ICollection<UCDocenteMomento> UCDocenteMomento { get; set; } = new List<UCDocenteMomento>();
 }

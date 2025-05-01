@@ -10,21 +10,29 @@
 
 <h2>UCs</h2>
 <hr />
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="UCs" OnValidSubmit="AddUCs" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="unidadecurricula" class="form-label">UnidadeCurricula:</label> 
-                <InputText id="unidadecurricula" @bind-Value="UCs.UnidadeCurricula" class="form-control" aria-required="true"/> 
-                <ValidationMessage For="() => UCs.UnidadeCurricula" class="text-danger" /> 
-            </div>        
+                <label for="unidadecurricula" class="form-label">UnidadeCurricula:</label>
+                <InputText id="unidadecurricula" @bind-Value="UCs.UnidadeCurricula" class="form-control" aria-required="true" />
+                <ValidationMessage For="() => UCs.UnidadeCurricula" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="internalcod" class="form-label">InternalCod:</label> 
-                <InputText id="internalcod" @bind-Value="UCs.InternalCod" class="form-control" /> 
-                <ValidationMessage For="() => UCs.InternalCod" class="text-danger" /> 
-            </div>        
+                <label for="internalcod" class="form-label">InternalCod:</label>
+                <InputText id="internalcod" @bind-Value="UCs.InternalCod" class="form-control" />
+                <ValidationMessage For="() => UCs.InternalCod" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -35,6 +43,8 @@
 </div>
 
 @code {
+    private string ErrorMessage { get; set; } = string.Empty;
+
     [SupplyParameterFromForm]
     private UCs UCs { get; set; } = new();
 
@@ -42,8 +52,22 @@
     private async Task AddUCs()
     {
         using var context = DbFactory.CreateDbContext();
-        context.UCs.Add(UCs);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/ucs");
+        try
+        {
+            context.UCs.Add(UCs);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/ucs");
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = "Esta UC já está registada.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
     }
 }

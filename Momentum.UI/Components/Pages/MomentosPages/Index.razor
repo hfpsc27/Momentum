@@ -14,7 +14,7 @@
     <a href="momentos/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Momentos">
+<QuickGrid Class="table" Items="context.Momentos.OrderBy(m => m.Nome)">
     <PropertyColumn Property="momentos => momentos.Nome" />
     <PropertyColumn Property="momentos => momentos.DiasUteisLancamentoAvaliacao" />
     <PropertyColumn Property="momentos => momentos.DiasAvisoDataMomento" />

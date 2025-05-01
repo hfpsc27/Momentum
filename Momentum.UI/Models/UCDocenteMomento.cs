@@ -33,13 +33,13 @@ public partial class UCDocenteMomento
     //[InverseProperty("UCDocenteMomentoDataMomento")]
     //public virtual Datas DataMomento { get; set; }
 
-    [ForeignKey("MomentoId")]
-    [InverseProperty("UCDocenteMomento")]
-    public virtual Momentos Momento { get; set; }
+    //[ForeignKey("MomentoId")]
+    //[InverseProperty("UCDocenteMomento")]
+    //public virtual Momentos Momento { get; set; }
 
-    [ForeignKey("RegimeId")]
-    [InverseProperty("UCDocenteMomento")]
-    public virtual Regimes Regime { get; set; }
+    //[ForeignKey("RegimeId")]
+    //[InverseProperty("UCDocenteMomento")]
+    //public virtual Regimes Regime { get; set; }
 
     //[ForeignKey("UCsDocenteId")]
     //[InverseProperty("UCDocenteMomento")]

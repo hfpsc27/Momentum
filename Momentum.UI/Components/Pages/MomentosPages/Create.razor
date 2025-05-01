@@ -10,31 +10,37 @@
 
 <h2>Momentos</h2>
 <hr />
+
+@if (!String.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="Momentos" OnValidSubmit="AddMomentos" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="nome" class="form-label">Nome:</label> 
-                <InputText id="nome" @bind-Value="Momentos.Nome" class="form-control" aria-required="true"/> 
-                <ValidationMessage For="() => Momentos.Nome" class="text-danger" /> 
-            </div>        
+                <label for="nome" class="form-label">Nome:</label>
+                <InputText id="nome" @bind-Value="Momentos.Nome" class="form-control" aria-required="true" />
+                <ValidationMessage For="() => Momentos.Nome" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="diasuteislancamentoavaliacao" class="form-label">DiasUteisLancamentoAvaliacao:</label> 
-                <InputNumber id="diasuteislancamentoavaliacao" @bind-Value="Momentos.DiasUteisLancamentoAvaliacao" class="form-control" /> 
-                <ValidationMessage For="() => Momentos.DiasUteisLancamentoAvaliacao" class="text-danger" /> 
-            </div>        
+                <label for="diasuteislancamentoavaliacao" class="form-label">DiasUteisLancamentoAvaliacao:</label>
+                <InputNumber id="diasuteislancamentoavaliacao" @bind-Value="Momentos.DiasUteisLancamentoAvaliacao" class="form-control" />
+                <ValidationMessage For="() => Momentos.DiasUteisLancamentoAvaliacao" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="diasavisodatamomento" class="form-label">DiasAvisoDataMomento:</label> 
-                <InputNumber id="diasavisodatamomento" @bind-Value="Momentos.DiasAvisoDataMomento" class="form-control" /> 
-                <ValidationMessage For="() => Momentos.DiasAvisoDataMomento" class="text-danger" /> 
-            </div>        
+                <label for="diasavisodatamomento" class="form-label">DiasAvisoDataMomento:</label>
+                <InputNumber id="diasavisodatamomento" @bind-Value="Momentos.DiasAvisoDataMomento" class="form-control" />
+                <ValidationMessage For="() => Momentos.DiasAvisoDataMomento" class="text-danger" />
+            </div>
             <div class="mb-3">
-                <label for="diasavisolancamentoavaliacao" class="form-label">DiasAvisoLancamentoAvaliacao:</label> 
-                <InputNumber id="diasavisolancamentoavaliacao" @bind-Value="Momentos.DiasAvisoLancamentoAvaliacao" class="form-control" /> 
-                <ValidationMessage For="() => Momentos.DiasAvisoLancamentoAvaliacao" class="text-danger" /> 
-            </div>        
+                <label for="diasavisolancamentoavaliacao" class="form-label">DiasAvisoLancamentoAvaliacao:</label>
+                <InputNumber id="diasavisolancamentoavaliacao" @bind-Value="Momentos.DiasAvisoLancamentoAvaliacao" class="form-control" />
+                <ValidationMessage For="() => Momentos.DiasAvisoLancamentoAvaliacao" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -45,6 +51,8 @@
 </div>
 
 @code {
+    public string ErrorMessage { get; set; } = string.Empty;
+
     [SupplyParameterFromForm]
     private Momentos Momentos { get; set; } = new();
 
@@ -52,8 +60,22 @@
     private async Task AddMomentos()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Momentos.Add(Momentos);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/momentos");
+        try
+        {
+            context.Momentos.Add(Momentos);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/momentos");
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = "Este momento já está registado.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
     }
 }

@@ -14,7 +14,7 @@
     <a href="ucs/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.UCs">
+<QuickGrid Class="table" Items="context.UCs.OrderBy(u => u.UnidadeCurricula)">
     <PropertyColumn Property="ucs => ucs.UnidadeCurricula" />
     <PropertyColumn Property="ucs => ucs.InternalCod" />
 

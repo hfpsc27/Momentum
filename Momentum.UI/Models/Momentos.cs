@@ -27,6 +27,6 @@ public partial class Momentos
     [Column(TypeName = "NUMERIC (3)")]
     public int? DiasAvisoLancamentoAvaliacao { get; set; }
 
-    [InverseProperty("Momento")]
-    public virtual ICollection<UCDocenteMomento> UCDocenteMomento { get; set; } = new List<UCDocenteMomento>();
+    //[InverseProperty("Momento")]
+    //public virtual ICollection<UCDocenteMomento> UCDocenteMomento { get; set; } = new List<UCDocenteMomento>();
 }

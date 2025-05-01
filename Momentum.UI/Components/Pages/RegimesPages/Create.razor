@@ -10,16 +10,24 @@
 
 <h2>Regimes</h2>
 <hr />
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="Regimes" OnValidSubmit="AddRegimes" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="mb-3">
-                <label for="nome" class="form-label">Nome:</label> 
-                <InputText id="nome" @bind-Value="Regimes.Nome" class="form-control" aria-required="true"/> 
-                <ValidationMessage For="() => Regimes.Nome" class="text-danger" /> 
-            </div>        
+                <label for="nome" class="form-label">Nome:</label>
+                <InputText id="nome" @bind-Value="Regimes.Nome" class="form-control" aria-required="true" />
+                <ValidationMessage For="() => Regimes.Nome" class="text-danger" />
+            </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -30,6 +38,8 @@
 </div>
 
 @code {
+    private string ErrorMessage { get; set; } = string.Empty;
+
     [SupplyParameterFromForm]
     private Regimes Regimes { get; set; } = new();
 
@@ -37,8 +47,22 @@
     private async Task AddRegimes()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Regimes.Add(Regimes);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/regimes");
+        try
+        {
+            context.Regimes.Add(Regimes);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/regimes");
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = "Este regime já está registado.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
     }
 }

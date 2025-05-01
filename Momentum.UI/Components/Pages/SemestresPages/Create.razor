@@ -10,6 +10,14 @@
 
 <h2>Semestres</h2>
 <hr />
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="Semestres" OnValidSubmit="AddSemestres" FormName="create" Enhance>
@@ -21,15 +29,15 @@
                 <ValidationMessage For="() => Semestres.Descricao" class="text-danger" />
             </div>
             @*<div class="mb-3">
-                <label for="dtini" class="form-label">DtIni:</label>
-                <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
-                <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="dtfim" class="form-label">DtFim:</label>
-                <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
-                <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
-            </div>*@
+                    <label for="dtini" class="form-label">DtIni:</label>
+                    <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
+                    <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dtfim" class="form-label">DtFim:</label>
+                    <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
+                    <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
+                </div>*@
 
             <div class="mb-3">
                 <label for="dtini" class="form-label">Início:</label>
@@ -65,6 +73,8 @@
 </div>
 
 @code {
+    public string ErrorMessage { get; set; } = string.Empty;
+
     [SupplyParameterFromForm]
     private Semestres Semestres { get; set; } = new();
 
@@ -80,8 +90,22 @@
     private async Task AddSemestres()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Semestres.Add(Semestres);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/semestres");
+        try
+        {
+            context.Semestres.Add(Semestres);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/semestres");
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = "Este semestre já está registado.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
     }
 }
