@@ -1,0 +1,48 @@
+﻿@page "/ucs/details"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>UCs</h2>
+    <hr />
+    @if (ucs is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">UnidadeCurricula</dt>
+            <dd class="col-sm-10">@ucs.UnidadeCurricula</dd>
+            <dt class="col-sm-2">InternalCod</dt>
+            <dd class="col-sm-10">@ucs.InternalCod</dd>
+        </dl>
+        <div>
+            <a href="@($"/ucs/edit?id={ucs.Id}")">Edit</a> |
+            <a href="@($"/ucs")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private UCs? ucs;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        ucs = await context.UCs.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (ucs is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

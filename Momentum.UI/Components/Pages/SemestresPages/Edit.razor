@@ -1,0 +1,99 @@
+﻿@page "/semestres/edit"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Semestres</h2>
+<hr />
+@if (Semestres is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Semestres" OnValidSubmit="UpdateSemestres" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Semestres.Id" value="@Semestres.Id" />
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">Descricao:</label>
+                    <InputText id="descricao" @bind-Value="Semestres.Descricao" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Semestres.Descricao" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dtini" class="form-label">DtIni:</label>
+                    <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
+                    <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dtfim" class="form-label">DtFim:</label>
+                    <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
+                    <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/semestres">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Semestres? Semestres { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Semestres ??= await context.Semestres.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Semestres is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateSemestres()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Semestres!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SemestresExists(Semestres!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/semestres");
+    }
+
+    private bool SemestresExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Semestres.Any(e => e.Id == id);
+    }
+}

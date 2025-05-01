@@ -1,0 +1,94 @@
+﻿@page "/docentelocal/edit"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>DocenteLocal</h2>
+<hr />
+@if (DocenteLocal is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="DocenteLocal" OnValidSubmit="UpdateDocenteLocal" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="DocenteLocal.Id" value="@DocenteLocal.Id" />
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome:</label>
+                    <InputText id="nome" @bind-Value="DocenteLocal.Nome" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => DocenteLocal.Nome" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="DocenteLocal.Email" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => DocenteLocal.Email" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/docentelocal">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private DocenteLocal? DocenteLocal { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        DocenteLocal ??= await context.DocenteLocal.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (DocenteLocal is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateDocenteLocal()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(DocenteLocal!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!DocenteLocalExists(DocenteLocal!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/docentelocal");
+    }
+
+    private bool DocenteLocalExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.DocenteLocal.Any(e => e.Id == id);
+    }
+}

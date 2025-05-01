@@ -1,0 +1,38 @@
+﻿@page "/semestres"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Momentum.UI.Models
+@using Momentum.UI.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="semestres/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Semestres">
+    <PropertyColumn Property="semestres => semestres.Descricao" />
+    <PropertyColumn Property="semestres => semestres.DtIni" />
+    <PropertyColumn Property="semestres => semestres.DtFim" />
+
+    <TemplateColumn Context="semestres">
+        <a href="@($"semestres/edit?id={semestres.Id}")">Edit</a> |
+        <a href="@($"semestres/details?id={semestres.Id}")">Details</a> |
+        <a href="@($"semestres/delete?id={semestres.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private AppDbContext2 context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

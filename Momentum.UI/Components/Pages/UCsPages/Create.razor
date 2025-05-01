@@ -1,0 +1,49 @@
+﻿@page "/ucs/create"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>UCs</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="UCs" OnValidSubmit="AddUCs" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="unidadecurricula" class="form-label">UnidadeCurricula:</label> 
+                <InputText id="unidadecurricula" @bind-Value="UCs.UnidadeCurricula" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => UCs.UnidadeCurricula" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="internalcod" class="form-label">InternalCod:</label> 
+                <InputText id="internalcod" @bind-Value="UCs.InternalCod" class="form-control" /> 
+                <ValidationMessage For="() => UCs.InternalCod" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/ucs">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private UCs UCs { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddUCs()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.UCs.Add(UCs);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/ucs");
+    }
+}

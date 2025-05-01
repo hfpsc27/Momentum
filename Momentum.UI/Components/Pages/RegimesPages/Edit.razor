@@ -1,0 +1,89 @@
+﻿@page "/regimes/edit"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Regimes</h2>
+<hr />
+@if (Regimes is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Regimes" OnValidSubmit="UpdateRegimes" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Regimes.Id" value="@Regimes.Id" />
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome:</label>
+                    <InputText id="nome" @bind-Value="Regimes.Nome" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Regimes.Nome" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/regimes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Regimes? Regimes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Regimes ??= await context.Regimes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Regimes is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateRegimes()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Regimes!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!RegimesExists(Regimes!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/regimes");
+    }
+
+    private bool RegimesExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Regimes.Any(e => e.Id == id);
+    }
+}

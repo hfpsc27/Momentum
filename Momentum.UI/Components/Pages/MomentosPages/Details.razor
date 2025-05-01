@@ -1,0 +1,52 @@
+﻿@page "/momentos/details"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Momentos</h2>
+    <hr />
+    @if (momentos is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Nome</dt>
+            <dd class="col-sm-10">@momentos.Nome</dd>
+            <dt class="col-sm-2">DiasUteisLancamentoAvaliacao</dt>
+            <dd class="col-sm-10">@momentos.DiasUteisLancamentoAvaliacao</dd>
+            <dt class="col-sm-2">DiasAvisoDataMomento</dt>
+            <dd class="col-sm-10">@momentos.DiasAvisoDataMomento</dd>
+            <dt class="col-sm-2">DiasAvisoLancamentoAvaliacao</dt>
+            <dd class="col-sm-10">@momentos.DiasAvisoLancamentoAvaliacao</dd>
+        </dl>
+        <div>
+            <a href="@($"/momentos/edit?id={momentos.Id}")">Edit</a> |
+            <a href="@($"/momentos")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Momentos? momentos;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        momentos = await context.Momentos.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (momentos is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

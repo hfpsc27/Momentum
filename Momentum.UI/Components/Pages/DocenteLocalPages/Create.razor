@@ -1,0 +1,49 @@
+﻿@page "/docentelocal/create"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>DocenteLocal</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="DocenteLocal" OnValidSubmit="AddDocenteLocal" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome:</label> 
+                <InputText id="nome" @bind-Value="DocenteLocal.Nome" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => DocenteLocal.Nome" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label> 
+                <InputText id="email" @bind-Value="DocenteLocal.Email" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => DocenteLocal.Email" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/docentelocal">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private DocenteLocal DocenteLocal { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddDocenteLocal()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.DocenteLocal.Add(DocenteLocal);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/docentelocal");
+    }
+}

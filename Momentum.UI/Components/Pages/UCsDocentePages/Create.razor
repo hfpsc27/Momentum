@@ -1,0 +1,103 @@
+﻿@page "/ucsdocentes/create"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>UCsDocente</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="UCsDocente" OnValidSubmit="AddUCsDocente" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <div class="mb-3">
+                <label for="docenteid" class="form-label">Docente:</label>
+                <InputSelect id="docenteid" class="form-control" @bind-Value="UCsDocente.DocenteId">
+                    <option value="">-- Selecione um Docente --</option>
+                    @foreach (var docente in Docentes)
+                    {
+                        <option value="@docente.Id">@docente.Nome</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCsDocente.DocenteId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="ucid" class="form-label">Unidade Curricular:</label>
+                <InputSelect id="ucid" class="form-control" @bind-Value="UCsDocente.UCId">
+                    <option value="">-- Selecione uma UC --</option>
+                    @foreach (var uc in UCs)
+                    {
+                        <option value="@uc.Id">@uc.UnidadeCurricula</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCsDocente.UCId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="semestreid" class="form-label">Semestre:</label>
+                <InputSelect id="semestreid" class="form-control" @bind-Value="UCsDocente.SemestreId">
+                    <option value="">-- Selecione um Semestre --</option>
+                    @foreach (var semestre in Semestres)
+                    {
+                        <option value="@semestre.Id">@semestre.Descricao</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCsDocente.SemestreId" class="text-danger" />
+            </div>
+
+            @*<div class="mb-3">
+                <label for="docenteid" class="form-label">DocenteId:</label>
+                <InputNumber id="docenteid" @bind-Value="UCsDocente.DocenteId" class="form-control" />
+                <ValidationMessage For="() => UCsDocente.DocenteId" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="ucid" class="form-label">UCId:</label>
+                <InputNumber id="ucid" @bind-Value="UCsDocente.UCId" class="form-control" />
+                <ValidationMessage For="() => UCsDocente.UCId" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="semestreid" class="form-label">SemestreId:</label>
+                <InputNumber id="semestreid" @bind-Value="UCsDocente.SemestreId" class="form-control" />
+                <ValidationMessage For="() => UCsDocente.SemestreId" class="text-danger" />
+            </div>*@
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/ucsdocentes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private UCsDocente UCsDocente { get; set; } = new();
+
+    private List<Docentes> Docentes { get; set; } = new();
+    private List<UCs> UCs { get; set; } = new();
+    private List<Semestres> Semestres { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Docentes = await context.Docentes.ToListAsync();
+        UCs = await context.UCs.ToListAsync();
+        Semestres = await context.Semestres.ToListAsync();
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddUCsDocente()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.UCsDocente.Add(UCsDocente);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/ucsdocentes");
+    }
+}

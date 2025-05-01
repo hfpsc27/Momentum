@@ -1,0 +1,59 @@
+﻿@page "/docentes/delete"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Docentes</h2>
+    <hr />
+    @if (docentes is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Nome</dt>
+            <dd class="col-sm-10">@docentes.Nome</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@docentes.Email</dd>
+        </dl>
+        <EditForm method="post" Model="docentes" OnValidSubmit="DeleteDocentes" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(docentes is null)">Delete</button> |
+            <a href="/docentes">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Docentes? docentes;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        docentes = await context.Docentes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (docentes is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteDocentes()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Docentes.Remove(docentes!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/docentes");
+    }
+}

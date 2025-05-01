@@ -1,0 +1,48 @@
+﻿@page "/docentes/details"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Docentes</h2>
+    <hr />
+    @if (docentes is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Nome</dt>
+            <dd class="col-sm-10">@docentes.Nome</dd>
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@docentes.Email</dd>
+        </dl>
+        <div>
+            <a href="@($"/docentes/edit?id={docentes.Id}")">Edit</a> |
+            <a href="@($"/docentes")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Docentes? docentes;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        docentes = await context.Docentes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (docentes is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

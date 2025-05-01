@@ -1,0 +1,55 @@
+﻿@page "/regimes/delete"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Regimes</h2>
+    <hr />
+    @if (regimes is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Nome</dt>
+            <dd class="col-sm-10">@regimes.Nome</dd>
+        </dl>
+        <EditForm method="post" Model="regimes" OnValidSubmit="DeleteRegimes" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(regimes is null)">Delete</button> |
+            <a href="/regimes">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Regimes? regimes;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        regimes = await context.Regimes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (regimes is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteRegimes()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Regimes.Remove(regimes!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/regimes");
+    }
+}

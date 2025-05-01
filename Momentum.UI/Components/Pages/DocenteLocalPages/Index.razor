@@ -1,0 +1,37 @@
+﻿@page "/docentelocal"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Momentum.UI.Models
+@using Momentum.UI.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="docentelocal/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.DocenteLocal">
+    <PropertyColumn Property="docentelocal => docentelocal.Nome" />
+    <PropertyColumn Property="docentelocal => docentelocal.Email" />
+
+    <TemplateColumn Context="docentelocal">
+        <a href="@($"docentelocal/edit?id={docentelocal.Id}")">Edit</a> |
+        <a href="@($"docentelocal/details?id={docentelocal.Id}")">Details</a> |
+        <a href="@($"docentelocal/delete?id={docentelocal.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private AppDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

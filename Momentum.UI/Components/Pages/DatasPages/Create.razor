@@ -1,0 +1,88 @@
+﻿@page "/datas/create"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Datas</h2>
+<hr />
+
+@if (!String.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger"><span class="badge bg-danger">@Datas.Data</span> @ErrorMessage</div>
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Datas" OnValidSubmit="AddDatas" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="mb-3">
+                <label for="data" class="form-label">Data:</label>
+                <InputDate id="data" @bind-Value="Datas.Data" class="form-control" />
+                <ValidationMessage For="() => Datas.Data" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="sabado" class="form-label">Sabado:</label>
+                <InputCheckbox id="sabado" @bind-Value="Datas.Sabado" class="form-check-input" />
+                <ValidationMessage For="() => Datas.Sabado" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="domingo" class="form-label">Domingo:</label>
+                <InputCheckbox id="domingo" @bind-Value="Datas.Domingo" class="form-check-input" />
+                <ValidationMessage For="() => Datas.Domingo" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="feriado" class="form-label">Feriado:</label>
+                <InputCheckbox id="feriado" @bind-Value="Datas.Feriado" class="form-check-input" />
+                <ValidationMessage For="() => Datas.Feriado" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="ferias" class="form-label">Ferias:</label>
+                <InputCheckbox id="ferias" @bind-Value="Datas.Ferias" class="form-check-input" />
+                <ValidationMessage For="() => Datas.Ferias" class="text-danger" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/datas">Back to List</a>
+</div>
+
+@code {
+
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    [SupplyParameterFromForm]
+    private Datas Datas { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddDatas()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        try
+        {
+            context.Datas.Add(Datas);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/datas");
+        }
+        catch (DbUpdateException ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = " já está registada.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
+    }
+}

@@ -1,0 +1,104 @@
+﻿@page "/momentos/edit"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Momentos</h2>
+<hr />
+@if (Momentos is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Momentos" OnValidSubmit="UpdateMomentos" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Momentos.Id" value="@Momentos.Id" />
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome:</label>
+                    <InputText id="nome" @bind-Value="Momentos.Nome" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Momentos.Nome" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="diasuteislancamentoavaliacao" class="form-label">DiasUteisLancamentoAvaliacao:</label>
+                    <InputNumber id="diasuteislancamentoavaliacao" @bind-Value="Momentos.DiasUteisLancamentoAvaliacao" class="form-control" />
+                    <ValidationMessage For="() => Momentos.DiasUteisLancamentoAvaliacao" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="diasavisodatamomento" class="form-label">DiasAvisoDataMomento:</label>
+                    <InputNumber id="diasavisodatamomento" @bind-Value="Momentos.DiasAvisoDataMomento" class="form-control" />
+                    <ValidationMessage For="() => Momentos.DiasAvisoDataMomento" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="diasavisolancamentoavaliacao" class="form-label">DiasAvisoLancamentoAvaliacao:</label>
+                    <InputNumber id="diasavisolancamentoavaliacao" @bind-Value="Momentos.DiasAvisoLancamentoAvaliacao" class="form-control" />
+                    <ValidationMessage For="() => Momentos.DiasAvisoLancamentoAvaliacao" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/momentos">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Momentos? Momentos { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Momentos ??= await context.Momentos.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Momentos is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateMomentos()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Momentos!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!MomentosExists(Momentos!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/momentos");
+    }
+
+    private bool MomentosExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Momentos.Any(e => e.Id == id);
+    }
+}

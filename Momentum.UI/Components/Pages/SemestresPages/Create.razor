@@ -1,0 +1,87 @@
+﻿@page "/semestres/create"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Semestres</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Semestres" OnValidSubmit="AddSemestres" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descricao:</label>
+                <InputText id="descricao" @bind-Value="Semestres.Descricao" class="form-control" aria-required="true" />
+                <ValidationMessage For="() => Semestres.Descricao" class="text-danger" />
+            </div>
+            @*<div class="mb-3">
+                <label for="dtini" class="form-label">DtIni:</label>
+                <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
+                <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="dtfim" class="form-label">DtFim:</label>
+                <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
+                <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
+            </div>*@
+
+            <div class="mb-3">
+                <label for="dtini" class="form-label">Início:</label>
+                <InputSelect id="dtini" class="form-control" @bind-Value="Semestres.DtIni">
+                    <option value="">-- Selecione uma data de início --</option>
+                    @foreach (var data in Datas)
+                    {
+                        <option value="@data.Id">@data.Data</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="dtfim" class="form-label">Fim:</label>
+                <InputSelect id="dtfim" class="form-control" @bind-Value="Semestres.DtFim">
+                    <option value="">-- Selecione uma data de fim --</option>
+                    @foreach (var data in Datas)
+                    {
+                        <option value="@data.Id">@data.Data</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/semestres">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Semestres Semestres { get; set; } = new();
+
+    public List<Datas> Datas { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Datas = await context.Datas.ToListAsync();
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddSemestres()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Semestres.Add(Semestres);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/semestres");
+    }
+}

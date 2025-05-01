@@ -1,0 +1,39 @@
+﻿@page "/momentos"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Momentum.UI.Models
+@using Momentum.UI.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="momentos/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Momentos">
+    <PropertyColumn Property="momentos => momentos.Nome" />
+    <PropertyColumn Property="momentos => momentos.DiasUteisLancamentoAvaliacao" />
+    <PropertyColumn Property="momentos => momentos.DiasAvisoDataMomento" />
+    <PropertyColumn Property="momentos => momentos.DiasAvisoLancamentoAvaliacao" />
+
+    <TemplateColumn Context="momentos">
+        <a href="@($"momentos/edit?id={momentos.Id}")">Edit</a> |
+        <a href="@($"momentos/details?id={momentos.Id}")">Details</a> |
+        <a href="@($"momentos/delete?id={momentos.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private AppDbContext2 context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

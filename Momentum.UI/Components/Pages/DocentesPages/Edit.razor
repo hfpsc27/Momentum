@@ -1,0 +1,94 @@
+﻿@page "/docentes/edit"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Docentes</h2>
+<hr />
+@if (Docentes is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Docentes" OnValidSubmit="UpdateDocentes" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Docentes.Id" value="@Docentes.Id" />
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome:</label>
+                    <InputText id="nome" @bind-Value="Docentes.Nome" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Docentes.Nome" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="Docentes.Email" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Docentes.Email" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/docentes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Docentes? Docentes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Docentes ??= await context.Docentes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Docentes is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateDocentes()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Docentes!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!DocentesExists(Docentes!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/docentes");
+    }
+
+    private bool DocentesExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Docentes.Any(e => e.Id == id);
+    }
+}

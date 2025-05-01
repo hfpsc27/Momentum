@@ -1,0 +1,36 @@
+﻿@page "/regimes"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Momentum.UI.Models
+@using Momentum.UI.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="regimes/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Regimes">
+    <PropertyColumn Property="regimes => regimes.Nome" />
+
+    <TemplateColumn Context="regimes">
+        <a href="@($"regimes/edit?id={regimes.Id}")">Edit</a> |
+        <a href="@($"regimes/details?id={regimes.Id}")">Details</a> |
+        <a href="@($"regimes/delete?id={regimes.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private AppDbContext2 context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

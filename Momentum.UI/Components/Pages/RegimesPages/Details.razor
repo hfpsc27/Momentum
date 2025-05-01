@@ -1,0 +1,46 @@
+﻿@page "/regimes/details"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Regimes</h2>
+    <hr />
+    @if (regimes is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Nome</dt>
+            <dd class="col-sm-10">@regimes.Nome</dd>
+        </dl>
+        <div>
+            <a href="@($"/regimes/edit?id={regimes.Id}")">Edit</a> |
+            <a href="@($"/regimes")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Regimes? regimes;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        regimes = await context.Regimes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (regimes is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}
