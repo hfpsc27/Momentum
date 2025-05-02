@@ -19,17 +19,17 @@ public partial class UCsDocente
 
     public int SemestreId { get; set; }
 
-    //[ForeignKey("DocenteId")]
     //[InverseProperty("UCsDocente")]
-    //public virtual Docentes Docente { get; set; }
+    [ForeignKey("DocenteId")]
+    public virtual Docentes Docente { get; set; }
 
-    //[ForeignKey("SemestreId")]
     //[InverseProperty("UCsDocente")]
-    //public virtual Semestres Semestre { get; set; }
+    [ForeignKey("SemestreId")]
+    public virtual Semestres Semestre { get; set; }
 
-    //[ForeignKey("UCId")]
     //[InverseProperty("UCsDocente")]
-    //public virtual UCs UC { get; set; }
+    [ForeignKey("UCId")]
+    public virtual UCs UC { get; set; }
 
     //[InverseProperty("UCsDocente")]
     //public virtual ICollection<UCDocenteMomento> UCDocenteMomento { get; set; } = new List<UCDocenteMomento>();

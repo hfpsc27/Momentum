@@ -14,10 +14,13 @@
     <a href="ucsdocentes/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.UCsDocente">
-    <PropertyColumn Property="ucsdocente => ucsdocente.DocenteId" />
-    <PropertyColumn Property="ucsdocente => ucsdocente.UCId" />
-    <PropertyColumn Property="ucsdocente => ucsdocente.SemestreId" />
+<QuickGrid Class="table" Items="context.UCsDocente.Include(d => d.Docente).Include(u => u.UC).Include(s => s.Semestre)">
+    @*<PropertyColumn Property="ucsdocente => ucsdocente.DocenteId" />*@
+    <PropertyColumn Property="ucsdocente => ucsdocente.Docente.Nome" />
+    @*<PropertyColumn Property="ucsdocente => ucsdocente.UCId" />*@
+    <PropertyColumn Property="ucsdocente => ucsdocente.UC.UnidadeCurricula" />
+    @*<PropertyColumn Property="ucsdocente => ucsdocente.SemestreId" />*@
+    <PropertyColumn Property="ucsdocente => ucsdocente.Semestre.Descricao" />
 
     <TemplateColumn Context="ucsdocente">
         <a href="@($"ucsdocentes/edit?id={ucsdocente.Id}")">Edit</a> |
