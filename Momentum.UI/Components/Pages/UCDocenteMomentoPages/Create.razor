@@ -1,0 +1,183 @@
+﻿@page "/ucdocentemomentos/create"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>UCDocenteMomento</h2>
+<hr />
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <p>@ErrorMessage</p>
+    </div>
+}
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="UCDocenteMomento" OnValidSubmit="AddUCDocenteMomento" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            @*<div class="mb-3">
+                    <label for="ucsdocenteid" class="form-label">UCsDocenteId:</label>
+                    <InputNumber id="ucsdocenteid" @bind-Value="UCDocenteMomento.UCsDocenteId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.UCsDocenteId" class="text-danger" />
+                </div>*@
+
+            <div class="mb-3">
+                <label for="ucsdocenteid" class="form-label">UCsDocenteId:</label>
+                <InputSelect id="ucsdocenteid" @bind-Value="UCDocenteMomento.UCsDocenteId" class="form-control">
+                    <option value="">-- Selecione um Plano --</option>
+                    @foreach (var ucdocente in UCsDocentes)
+                    {
+                        <option value="@ucdocente.Id">@($"{ucdocente.Docente.Nome} - {ucdocente.UC.UnidadeCurricula} - {ucdocente.Semestre.Descricao}") </option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCDocenteMomento.UCsDocenteId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="regimeid" class="form-label">RegimeId:</label>
+                <InputSelect id="regimeid" @bind-Value="UCDocenteMomento.RegimeId" class="form-control">
+                    <option value="">-- Selecione um Regime --</option>
+                    @foreach (var regime in Regimes)
+                    {
+                        <option value="@regime.Id">@regime.Nome</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCDocenteMomento.RegimeId" class="text-danger" />
+            </div>
+
+            @*<div class="mb-3">
+                    <label for="regimeid" class="form-label">RegimeId:</label>
+                    <InputNumber id="regimeid" @bind-Value="UCDocenteMomento.RegimeId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.RegimeId" class="text-danger" />
+                </div>*@
+
+            @*<div class="mb-3">
+                    <label for="momentoid" class="form-label">MomentoId:</label>
+                    <InputNumber id="momentoid" @bind-Value="UCDocenteMomento.MomentoId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.MomentoId" class="text-danger" />
+                </div>*@
+
+            <div class="mb-3">
+                <label for="momentoid" class="form-label">MomentoId:</label>
+                <InputSelect id="momentoid" @bind-Value="UCDocenteMomento.MomentoId" class="form-control">
+                    <option value="">-- Selecione um Momento --</option>
+                    @foreach (var momento in Momentos)
+                    {
+                        <option value="@momento.Id">@momento.Nome</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCDocenteMomento.MomentoId" class="text-danger" />
+            </div>
+
+            @*<div class="mb-3">
+                    <label for="datamomentoid" class="form-label">DataMomentoId:</label>
+                    <InputNumber id="datamomentoid" @bind-Value="UCDocenteMomento.DataMomentoId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.DataMomentoId" class="text-danger" />
+                </div>*@
+
+            <div class="mb-3">
+                <label for="datamomentoid" class="form-label">DataMomentoId:</label>
+                <InputSelect id="datamomentoid" @bind-Value="UCDocenteMomento.DataMomentoId" class="form-control">
+                    <option value="">-- Selecione uma data disponível --</option>
+                    @foreach (var data in Datas)
+                    {
+                        <option value="@data.Id">@data.Data</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => UCDocenteMomento.DataMomentoId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="peso" class="form-label">Peso:</label>
+                <InputNumber id="peso" @bind-Value="UCDocenteMomento.Peso" class="form-control" />
+                <ValidationMessage For="() => UCDocenteMomento.Peso" class="text-danger" />
+            </div>
+            @*<div class="mb-3">
+                    <label for="datainsert" class="form-label">DataInsert:</label>
+                    <InputNumber id="datainsert" @bind-Value="UCDocenteMomento.DataInsert" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.DataInsert" class="text-danger" />
+                </div>*@
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/ucdocentemomentos">Back to List</a>
+</div>
+
+@code {
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    [SupplyParameterFromForm]
+    public UCDocenteMomento UCDocenteMomento { get; set; } = new();
+
+    private List<UCsDocente> UCsDocentes { get; set; } = new();
+    private List<Momentos> Momentos { get; set; } = new();
+    private List<Regimes> Regimes { get; set; } = new();
+    private List<Datas> Datas { get; set; } = new();
+
+    override protected async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        UCsDocentes = await context.UCsDocente.Include(d => d.Docente).Include(u => u.UC).Include(s => s.Semestre).ToListAsync();
+        Momentos = await context.Momentos.ToListAsync();
+        Regimes = await context.Regimes.ToListAsync();
+        Datas = await context.Datas
+            .Where(data => !context.UCDocenteMomento.Any(ucdm => ucdm.DataMomentoId == data.Id))
+            .ToListAsync();
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddUCDocenteMomento()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var x = context.UCDocenteMomento
+            .Where(u => u.UCsDocenteId == UCDocenteMomento.UCsDocenteId
+            && u.MomentoId == UCDocenteMomento.MomentoId
+            && u.RegimeId == UCDocenteMomento.RegimeId)
+            ;
+
+        var maxMomentos = x.Count();
+        var maxPonderacao = x.Sum(u => u.Peso);
+
+        try
+        {
+            if (maxPonderacao + UCDocenteMomento.Peso > 100)
+            {
+                ErrorMessage = "Execede a ponderção máxima!";
+                throw new Exception(ErrorMessage);
+            }
+
+            if (maxMomentos + 1 > 4)
+            {
+                ErrorMessage = "Execede o n.º máximo de momentos!";
+                throw new Exception(ErrorMessage);
+            }
+
+            UCDocenteMomento.DataInsert = DateTime.Now;
+
+            context.UCDocenteMomento.Add(UCDocenteMomento);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/ucdocentemomentos");
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = "Esta associa~ção já está registada.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
+    }
+}

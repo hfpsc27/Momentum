@@ -1,0 +1,114 @@
+﻿@page "/ucdocentemomentos/edit"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>UCDocenteMomento</h2>
+<hr />
+@if (UCDocenteMomento is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="UCDocenteMomento" OnValidSubmit="UpdateUCDocenteMomento" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="UCDocenteMomento.Id" value="@UCDocenteMomento.Id" />
+                <div class="mb-3">
+                    <label for="ucsdocenteid" class="form-label">UCsDocenteId:</label>
+                    <InputNumber id="ucsdocenteid" @bind-Value="UCDocenteMomento.UCsDocenteId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.UCsDocenteId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="momentoid" class="form-label">MomentoId:</label>
+                    <InputNumber id="momentoid" @bind-Value="UCDocenteMomento.MomentoId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.MomentoId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="regimeid" class="form-label">RegimeId:</label>
+                    <InputNumber id="regimeid" @bind-Value="UCDocenteMomento.RegimeId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.RegimeId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datamomentoid" class="form-label">DataMomentoId:</label>
+                    <InputNumber id="datamomentoid" @bind-Value="UCDocenteMomento.DataMomentoId" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.DataMomentoId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="peso" class="form-label">Peso:</label>
+                    <InputNumber id="peso" @bind-Value="UCDocenteMomento.Peso" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.Peso" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datainsert" class="form-label">DataInsert:</label>
+                    <InputNumber id="datainsert" @bind-Value="UCDocenteMomento.DataInsert" class="form-control" />
+                    <ValidationMessage For="() => UCDocenteMomento.DataInsert" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/ucdocentemomentos">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private UCDocenteMomento? UCDocenteMomento { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        UCDocenteMomento ??= await context.UCDocenteMomento.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (UCDocenteMomento is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateUCDocenteMomento()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(UCDocenteMomento!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!UCDocenteMomentoExists(UCDocenteMomento!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/ucdocentemomentos");
+    }
+
+    private bool UCDocenteMomentoExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.UCDocenteMomento.Any(e => e.Id == id);
+    }
+}

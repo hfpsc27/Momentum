@@ -1,0 +1,43 @@
+﻿@page "/bind"
+@using Momentum.UI.Models
+@rendermode InteractiveServer
+
+<PageTitle>Bind</PageTitle>
+
+<h1>Bind Example</h1>
+
+<div>
+    <InputText @bind-Value="DataText" @onfocusout="OnClick" class="form-control" />
+    <InputDate @bind-Value="Datas.Data" @onchange="OnClick" class="form-control" />
+    <input type="date" @bind="Datas.Data" /> 
+</div>
+<div>
+    <InputCheckbox @bind-Value="Datas.Sabado" class="form-check-input" />
+</div>
+
+<button class="btn btn-outline-primary" @onclick="OnClick">Click me</button>
+
+
+<p>@MyProperty</p>
+<p>@DataText</p>
+
+@code {
+    public bool MyProperty { get; set; }
+    public string DataText { get; set; } = DateTime.Today.ToString("dd/MM/yyyy");
+
+    public Datas Datas { get; set; } = new();
+
+    public void OnClick()
+    {
+        //Datas.Data = DateOnly.Parse(DataText);
+        if (Datas.Data.DayOfWeek == DayOfWeek.Saturday)
+        {
+            Datas.Sabado = true;
+        }
+        else
+        {
+            Datas.Sabado = false;
+        }
+        StateHasChanged();
+    }
+}

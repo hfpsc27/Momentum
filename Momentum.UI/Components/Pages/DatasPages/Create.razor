@@ -3,6 +3,7 @@
 @using Momentum.UI.Models
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
 
@@ -60,7 +61,15 @@
     public string ErrorMessage { get; set; } = string.Empty;
 
     [SupplyParameterFromForm]
-    private Datas Datas { get; set; } = new();
+    private Datas Datas { get; set; } = new() { Data = DateOnly.FromDateTime(DateTime.Now) };
+
+    protected override async Task OnInitializedAsync()
+    {
+        Datas.Data = DateOnly.FromDateTime(DateTime.Now);
+        Datas.Sabado = Datas.Data.DayOfWeek == DayOfWeek.Saturday ? true : false;
+        Datas.Domingo = Datas.Data.DayOfWeek == DayOfWeek.Sunday ? true : false;
+    }
+
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddDatas()

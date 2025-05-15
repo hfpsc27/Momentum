@@ -1,0 +1,75 @@
+﻿@page "/ucdocentemomentos/delete"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>UCDocenteMomento</h2>
+    <hr />
+    @if (ucdocentemomento is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">UCsDocenteId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.UCsDocenteId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">MomentoId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.MomentoId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">RegimeId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.RegimeId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DataMomentoId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.DataMomentoId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Peso</dt>
+            <dd class="col-sm-10">@ucdocentemomento.Peso</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DataInsert</dt>
+            <dd class="col-sm-10">@ucdocentemomento.DataInsert</dd>
+        </dl>
+        <EditForm method="post" Model="ucdocentemomento" OnValidSubmit="DeleteUCDocenteMomento" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(ucdocentemomento is null)">Delete</button> |
+            <a href="/ucdocentemomentos">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private UCDocenteMomento? ucdocentemomento;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        ucdocentemomento = await context.UCDocenteMomento.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (ucdocentemomento is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteUCDocenteMomento()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.UCDocenteMomento.Remove(ucdocentemomento!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/ucdocentemomentos");
+    }
+}

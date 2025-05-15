@@ -10,6 +10,12 @@
 
 <h2>UCsDocente</h2>
 <hr />
+
+@if (!String.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
 <div class="row">
     <div class="col-md-4">
         <EditForm method="post" Model="UCsDocente" OnValidSubmit="AddUCsDocente" FormName="create" Enhance>
@@ -53,20 +59,20 @@
             </div>
 
             @*<div class="mb-3">
-                <label for="docenteid" class="form-label">DocenteId:</label>
-                <InputNumber id="docenteid" @bind-Value="UCsDocente.DocenteId" class="form-control" />
-                <ValidationMessage For="() => UCsDocente.DocenteId" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="ucid" class="form-label">UCId:</label>
-                <InputNumber id="ucid" @bind-Value="UCsDocente.UCId" class="form-control" />
-                <ValidationMessage For="() => UCsDocente.UCId" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="semestreid" class="form-label">SemestreId:</label>
-                <InputNumber id="semestreid" @bind-Value="UCsDocente.SemestreId" class="form-control" />
-                <ValidationMessage For="() => UCsDocente.SemestreId" class="text-danger" />
-            </div>*@
+                    <label for="docenteid" class="form-label">DocenteId:</label>
+                    <InputNumber id="docenteid" @bind-Value="UCsDocente.DocenteId" class="form-control" />
+                    <ValidationMessage For="() => UCsDocente.DocenteId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="ucid" class="form-label">UCId:</label>
+                    <InputNumber id="ucid" @bind-Value="UCsDocente.UCId" class="form-control" />
+                    <ValidationMessage For="() => UCsDocente.UCId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="semestreid" class="form-label">SemestreId:</label>
+                    <InputNumber id="semestreid" @bind-Value="UCsDocente.SemestreId" class="form-control" />
+                    <ValidationMessage For="() => UCsDocente.SemestreId" class="text-danger" />
+                </div>*@
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -77,6 +83,8 @@
 </div>
 
 @code {
+    public string ErrorMessage { get; set; } = string.Empty;
+
     [SupplyParameterFromForm]
     private UCsDocente UCsDocente { get; set; } = new();
 
@@ -96,8 +104,23 @@
     private async Task AddUCsDocente()
     {
         using var context = DbFactory.CreateDbContext();
-        context.UCsDocente.Add(UCsDocente);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/ucsdocentes");
+
+        try
+        {
+            context.UCsDocente.Add(UCsDocente);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/ucsdocentes");
+        }
+        catch (Exception ex)
+        {
+            if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
+            {
+                ErrorMessage = "Esta associação já está registada.";
+            }
+            else
+            {
+                ErrorMessage = ex.Message;
+            }
+        }
     }
 }

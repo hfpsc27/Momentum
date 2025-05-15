@@ -1,0 +1,56 @@
+﻿@page "/ucdocentemomentos/details"
+@using Microsoft.EntityFrameworkCore
+@using Momentum.UI.Models
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>UCDocenteMomento</h2>
+    <hr />
+    @if (ucdocentemomento is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">UCsDocenteId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.UCsDocenteId</dd>
+            <dt class="col-sm-2">MomentoId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.MomentoId</dd>
+            <dt class="col-sm-2">RegimeId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.RegimeId</dd>
+            <dt class="col-sm-2">DataMomentoId</dt>
+            <dd class="col-sm-10">@ucdocentemomento.DataMomentoId</dd>
+            <dt class="col-sm-2">Peso</dt>
+            <dd class="col-sm-10">@ucdocentemomento.Peso</dd>
+            <dt class="col-sm-2">DataInsert</dt>
+            <dd class="col-sm-10">@ucdocentemomento.DataInsert</dd>
+        </dl>
+        <div>
+            <a href="@($"/ucdocentemomentos/edit?id={ucdocentemomento.Id}")">Edit</a> |
+            <a href="@($"/ucdocentemomentos")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private UCDocenteMomento? ucdocentemomento;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        ucdocentemomento = await context.UCDocenteMomento.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (ucdocentemomento is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

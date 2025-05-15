@@ -23,25 +23,21 @@ public partial class UCDocenteMomento
 
     public double Peso { get; set; }
 
-    public int DataInsert { get; set; }
+    public DateTime DataInsert { get; set; }
 
-    //[ForeignKey("DataInsert")]
-    //[InverseProperty("UCDocenteMomentoDataInsertNavigation")]
-    //public virtual Datas DataInsertNavigation { get; set; }
-
-    //[ForeignKey("DataMomentoId")]
     //[InverseProperty("UCDocenteMomentoDataMomento")]
-    //public virtual Datas DataMomento { get; set; }
+    [ForeignKey("DataMomentoId")]
+    public virtual Datas DataMomento { get; set; }
 
-    //[ForeignKey("MomentoId")]
     //[InverseProperty("UCDocenteMomento")]
-    //public virtual Momentos Momento { get; set; }
+    [ForeignKey("MomentoId")]
+    public virtual Momentos Momento { get; set; }
 
-    //[ForeignKey("RegimeId")]
     //[InverseProperty("UCDocenteMomento")]
-    //public virtual Regimes Regime { get; set; }
+    [ForeignKey("RegimeId")]
+    public virtual Regimes Regime { get; set; }
 
-    //[ForeignKey("UCsDocenteId")]
     //[InverseProperty("UCDocenteMomento")]
-    //public virtual UCsDocente UCsDocente { get; set; }
+    [ForeignKey("UCsDocenteId")]
+    public virtual UCsDocente UCsDocente { get; set; }
 }

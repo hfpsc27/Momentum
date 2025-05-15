@@ -5,32 +5,58 @@
 @using Momentum.UI.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
 <h1>Index</h1>
 
 <p>
-    <a href="docentes/create">Create New</a>
+    <a href="docentes/create" class="btn btn-sm btn-outline-primary">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Docentes">
-    <PropertyColumn Property="docentes => docentes.Nome" />
-    <PropertyColumn Property="docentes => docentes.Email" />
+<QuickGrid Class="table" Items="FilteredDocentes">
+    <PropertyColumn Property="@(d => d.Nome)" Sortable="true" InitialSortDirection="SortDirection.Ascending" IsDefaultSortColumn="true">
+        <ColumnOptions>
+            <div class="search-box">
+                <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" placeholder="Nome..." class="form-control" />
+            </div>
+        </ColumnOptions>
+    </PropertyColumn>
+
+    <PropertyColumn Property="@(d => d.Email)" />
 
     <TemplateColumn Context="docentes">
-        <a href="@($"docentes/edit?id={docentes.Id}")">Edit</a> |
-        <a href="@($"docentes/details?id={docentes.Id}")">Details</a> |
-        <a href="@($"docentes/delete?id={docentes.Id}")">Delete</a>
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <a href="@($"docentes/edit?id={docentes.Id}")" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="@($"docentes/details?id={docentes.Id}")" class="btn btn-sm btn-outline-primary">Detalhe</a>
+            <a href="@($"docentes/delete?id={docentes.Id}")" class="btn btn-sm btn-outline-danger">Apagar</a>
+        </div>
     </TemplateColumn>
 </QuickGrid>
 
 @code {
     private AppDbContext2 context = default!;
+    IQueryable<Docentes> Docentes = null!;
+    string nameFilter = string.Empty;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        Docentes = context.Docentes.AsQueryable();
+    }
+
+    IQueryable<Docentes> FilteredDocentes
+    {
+        get
+        {
+            var result = Docentes.AsQueryable();
+            
+            if (!string.IsNullOrWhiteSpace(nameFilter))
+                result = result.Where(d => d.Nome.ToLower().Contains(nameFilter.ToLower()));
+            
+            return result;
+        }
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

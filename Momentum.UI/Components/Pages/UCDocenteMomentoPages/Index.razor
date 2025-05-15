@@ -1,0 +1,42 @@
+﻿@page "/ucdocentemomentos"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Momentum.UI.Models
+@using Momentum.UI.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="ucdocentemomentos/create">Create New</a>
+</p>
+<span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+
+<QuickGrid Class="table" Items="context.UCDocenteMomento.Include(u => u.UCsDocente).Include(m => m.Momento).Include(r => r.Regime).Include(d => d.DataMomento)">
+    <PropertyColumn Property="@(ucdocentemomento => ucdocentemomento.UCsDocenteId)" />
+    <PropertyColumn Property="ucdocentemomento => ucdocentemomento.Momento.Nome" />
+    <PropertyColumn Property="ucdocentemomento => ucdocentemomento.Regime.Nome" />
+    <PropertyColumn Property="ucdocentemomento => ucdocentemomento.DataMomento.Data" />
+    <PropertyColumn Property="ucdocentemomento => ucdocentemomento.Peso" />
+    <PropertyColumn Property="ucdocentemomento => ucdocentemomento.DataInsert" />
+
+    <TemplateColumn Context="ucdocentemomento">
+        <a href="@($"ucdocentemomentos/edit?id={ucdocentemomento.Id}")">Edit</a> |
+        <a href="@($"ucdocentemomentos/details?id={ucdocentemomento.Id}")">Details</a> |
+        <a href="@($"ucdocentemomentos/delete?id={ucdocentemomento.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private AppDbContext2 context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
