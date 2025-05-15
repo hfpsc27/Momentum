@@ -5,32 +5,62 @@
 @using Momentum.UI.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<h2>Unidades curriculares</h2>
+<hr />
 
 <p>
-    <a href="ucs/create">Create New</a>
+    <a href="ucs/create" class="btn btn-sm btn-outline-primary">Nova unidade curricular</a>
 </p>
 
-<QuickGrid Class="table" Items="context.UCs.OrderBy(u => u.UnidadeCurricula)">
-    <PropertyColumn Property="ucs => ucs.UnidadeCurricula" />
+<QuickGrid Class="table table-sm table-striped" Items="FilteredUCs" Pagination="pagination">
+    <PropertyColumn Property="ucs => ucs.UnidadeCurricula" Sortable="true" InitialSortDirection="SortDirection.Ascending" IsDefaultSortColumn="true">
+        <ColumnOptions>
+            <div class="search-box">
+                <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" placeholder="UC..." class="form-control form-control-sm" />
+            </div>
+        </ColumnOptions>
+    </PropertyColumn>
     <PropertyColumn Property="ucs => ucs.InternalCod" />
 
     <TemplateColumn Context="ucs">
-        <a href="@($"ucs/edit?id={ucs.Id}")">Edit</a> |
-        <a href="@($"ucs/details?id={ucs.Id}")">Details</a> |
-        <a href="@($"ucs/delete?id={ucs.Id}")">Delete</a>
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <a href="@($"ucs/edit?id={ucs.Id}")" class="btn btn-sm btn-outline-primary">Edit</a>
+            <a href="@($"ucs/details?id={ucs.Id}")" class="btn btn-sm btn-outline-primary">Details</a>
+            <a href="@($"ucs/delete?id={ucs.Id}")" class="btn btn-sm btn-outline-danger">Delete</a>
+        </div>
     </TemplateColumn>
 </QuickGrid>
 
+<Paginator State="pagination" />
+
 @code {
     private AppDbContext2 context = default!;
+    IQueryable<UCs> Ucs = null!;
+    string nameFilter = string.Empty;
+
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        Ucs = context.UCs.AsNoTracking().AsQueryable();
+    }
+
+    IQueryable<UCs> FilteredUCs
+    {
+        get
+        {
+            var result = Ucs.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(nameFilter))
+                result = result.Where(u => u.UnidadeCurricula.ToLower().Contains(nameFilter.ToLower()));
+
+            return result;
+        }
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

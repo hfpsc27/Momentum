@@ -9,17 +9,18 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<h2>Lista de Docentes</h2>
+<hr />
 
 <p>
-    <a href="docentes/create" class="btn btn-sm btn-outline-primary">Create New</a>
+    <a href="docentes/create" class="btn btn-sm btn-outline-primary">Novo docente</a>
 </p>
 
-<QuickGrid Class="table" Items="FilteredDocentes">
+<QuickGrid Class="table table-striped table-sm" Items="FilteredDocentes" Pagination="pagination">
     <PropertyColumn Property="@(d => d.Nome)" Sortable="true" InitialSortDirection="SortDirection.Ascending" IsDefaultSortColumn="true">
         <ColumnOptions>
             <div class="search-box">
-                <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" placeholder="Nome..." class="form-control" />
+                <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" placeholder="Nome..." class="form-control form-control-sm" />
             </div>
         </ColumnOptions>
     </PropertyColumn>
@@ -35,10 +36,17 @@
     </TemplateColumn>
 </QuickGrid>
 
+@if (FilteredDocentes.Count() > 35)
+{
+    <Paginator State="pagination" />
+}
+
 @code {
     private AppDbContext2 context = default!;
     IQueryable<Docentes> Docentes = null!;
+
     string nameFilter = string.Empty;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
 
     protected override void OnInitialized()
     {
@@ -51,10 +59,10 @@
         get
         {
             var result = Docentes.AsQueryable();
-            
+
             if (!string.IsNullOrWhiteSpace(nameFilter))
                 result = result.Where(d => d.Nome.ToLower().Contains(nameFilter.ToLower()));
-            
+
             return result;
         }
     }
