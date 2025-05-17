@@ -55,7 +55,7 @@
             await context.SaveChangesAsync();
             NavigationManager.NavigateTo("/docentes");
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex) when (ex is not NavigationException)
         {
             if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
             {

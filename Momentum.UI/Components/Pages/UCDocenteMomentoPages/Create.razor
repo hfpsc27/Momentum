@@ -168,7 +168,7 @@
             await context.SaveChangesAsync();
             NavigationManager.NavigateTo("/ucdocentemomentos");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not NavigationException)
         {
             if (ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE"))
             {

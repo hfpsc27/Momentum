@@ -5,36 +5,76 @@
 @using Momentum.UI.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@rendermode InteractiveServer
 
-<PageTitle>Index</PageTitle>
+<PageTitle>UC Docente Associação</PageTitle>
 
-<h1>Index</h1>
+<h2>Associação UC Docente</h2>
+<hr />
 
 <p>
-    <a href="ucsdocentes/create">Create New</a>
+    <a href="ucsdocentes/create" class="btn btn-sm btn-outline-primary">➕ Nova associação</a>
 </p>
 
-<QuickGrid Class="table" Items="context.UCsDocente.Include(d => d.Docente).Include(u => u.UC).Include(s => s.Semestre)">
-    @*<PropertyColumn Property="ucsdocente => ucsdocente.DocenteId" />*@
-    <PropertyColumn Property="ucsdocente => ucsdocente.Docente.Nome" />
-    @*<PropertyColumn Property="ucsdocente => ucsdocente.UCId" />*@
-    <PropertyColumn Property="ucsdocente => ucsdocente.UC.UnidadeCurricula" />
-    @*<PropertyColumn Property="ucsdocente => ucsdocente.SemestreId" />*@
-    <PropertyColumn Property="ucsdocente => ucsdocente.Semestre.Descricao" />
+<QuickGrid Class="table" Items="FilteredUcDocentes">
+    <PropertyColumn Property="ucsdocente => ucsdocente.UC.UnidadeCurricula" Title="Unidade Curricular" Sortable="true" IsDefaultSortColumn="true" InitialSortDirection="SortDirection.Ascending">
+        <ColumnOptions>
+            <div class="search-box">
+                <input type="search" autofocus @bind="ucFilter" @bind:event="oninput" placeholder="UC..." class="form-control form-control-sm" />
+            </div>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Property="ucsdocente => ucsdocente.Docente.Nome" Sortable="true">
+        <ColumnOptions>
+            <div class="search-box">
+                <input type="search" autofocus @bind="docenteFilter" @bind:event="oninput" placeholder="Nome..." class="form-control form-control-sm" />
+            </div>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Property="ucsdocente => ucsdocente.Semestre.Descricao" Title="Semestre" />
 
     <TemplateColumn Context="ucsdocente">
-        <a href="@($"ucsdocentes/edit?id={ucsdocente.Id}")">Edit</a> |
-        <a href="@($"ucsdocentes/details?id={ucsdocente.Id}")">Details</a> |
-        <a href="@($"ucsdocentes/delete?id={ucsdocente.Id}")">Delete</a>
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <a href="@($"ucsdocentes/edit?id={ucsdocente.Id}")" class="btn btn-sm btn-outline-primary">✏️</a>
+            <a href="@($"ucsdocentes/details?id={ucsdocente.Id}")" class="btn btn-sm btn-outline-primary">🔍</a>
+            <a href="@($"ucsdocentes/delete?id={ucsdocente.Id}")" class="btn btn-sm btn-outline-danger">🗑️</a>
+        </div>
     </TemplateColumn>
 </QuickGrid>
 
 @code {
     private AppDbContext2 context = default!;
+    IQueryable<UCsDocente> UCsDocente = null!;
+
+    string ucFilter = string.Empty;
+    string docenteFilter = string.Empty;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        UCsDocente = context.UCsDocente
+            .Include(d => d.Docente)
+            .Include(u => u.UC)
+            .Include(s => s.Semestre)
+            .AsNoTracking()
+            .AsQueryable();
+    }
+
+    IQueryable<UCsDocente> FilteredUcDocentes
+    {
+        get
+        {
+            var result = UCsDocente.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(docenteFilter))
+                result = result.Where(d => d.Docente.Nome.ToLower().Contains(docenteFilter.ToLower()));
+
+            if (!string.IsNullOrWhiteSpace(ucFilter))
+                result = result.Where(d => d.UC.UnidadeCurricula.ToLower().Contains(ucFilter.ToLower()));
+
+            return result;
+        }
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
