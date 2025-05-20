@@ -3,6 +3,7 @@
 @using Momentum.UI.Models
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
 
@@ -20,6 +21,11 @@
 
 <div class="row">
     <div class="col-md-4">
+        <div class="mb-3">
+            <label for="includeSatuday" class="form-label">Incluir sábados:</label>
+            <InputCheckbox id="IncludeSaturday" @bind-Value="IncludeSaturday" @onchange="OnIncludeSaturdayChanged" class="form-check-inline" />
+        </div>
+
         <EditForm method="post" Model="Semestres" OnValidSubmit="AddSemestres" FormName="create" Enhance>
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
@@ -29,15 +35,15 @@
                 <ValidationMessage For="() => Semestres.Descricao" class="text-danger" />
             </div>
             @*<div class="mb-3">
-                    <label for="dtini" class="form-label">DtIni:</label>
-                    <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
-                    <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="dtfim" class="form-label">DtFim:</label>
-                    <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
-                    <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
-                </div>*@
+                <label for="dtini" class="form-label">DtIni:</label>
+                <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
+                <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="dtfim" class="form-label">DtFim:</label>
+                <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
+                <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
+            </div>*@
 
             <div class="mb-3">
                 <label for="dtini" class="form-label">Início:</label>
@@ -45,7 +51,7 @@
                     <option value="">-- Selecione uma data de início --</option>
                     @foreach (var data in Datas)
                     {
-                        <option value="@data.Id">@data.Data</option>
+                        <option value="@data.Id">@(data.Data.ToString() + " " + data.Data.DayOfWeek)</option>
                     }
                 </InputSelect>
                 <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
@@ -75,15 +81,26 @@
 @code {
     public string ErrorMessage { get; set; } = string.Empty;
 
+    public bool IncludeSaturday { get; set; } = false;
+
     [SupplyParameterFromForm]
     private Semestres Semestres { get; set; } = new();
 
     public List<Datas> Datas { get; set; } = new();
+    public List<Datas> AllDatas { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        Datas = await context.Datas.ToListAsync();
+        AllDatas = await context.Datas.ToListAsync();
+        Datas = AllDatas;
+    }
+
+    private void OnIncludeSaturdayChanged(ChangeEventArgs e)
+    {
+        IncludeSaturday = (bool)e.Value!;
+        Datas = IncludeSaturday ? AllDatas : AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
+        StateHasChanged();
     }
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
