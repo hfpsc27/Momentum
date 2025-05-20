@@ -5,24 +5,28 @@
 @using Momentum.UI.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
+@rendermode InteractiveServer
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Semestres</PageTitle>
 
-<h1>Index</h1>
+<h2>Semestres</h2>
+<hr />
 
 <p>
-    <a href="semestres/create">Create New</a>
+    <a href="semestres/create" class="btn btn-sm btn-outline-primary">➕ Criar semestre</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Semestres">
-    <PropertyColumn Property="semestres => semestres.Descricao" />
-    <PropertyColumn Property="semestres => semestres.DtIni" />
-    <PropertyColumn Property="semestres => semestres.DtFim" />
+<QuickGrid Class="table" Items="context.Semestres.Include(d => d.DtIniNavigation).Include(d => d.DtFimNavigation)">
+    <PropertyColumn Property="semestres => semestres.Descricao" Sortable="true" />
+    <PropertyColumn Property="semestres => semestres.DtIniNavigation.Data" Sortable="true" Title="Início" Class="text-success" />
+    <PropertyColumn Property="semestres => semestres.DtFimNavigation.Data" Sortable="true" Title="Fim" Class="text-danger" />
 
     <TemplateColumn Context="semestres">
-        <a href="@($"semestres/edit?id={semestres.Id}")">Edit</a> |
-        <a href="@($"semestres/details?id={semestres.Id}")">Details</a> |
-        <a href="@($"semestres/delete?id={semestres.Id}")">Delete</a>
+        <div class="btn-group" role="group" aria-label="opGroup">
+            <a href="@($"semestres/edit?id={semestres.Id}")" class="btn btn-sm btn-outline-primary">✏️</a>
+            <a href="@($"semestres/details?id={semestres.Id}")" class="btn btn-sm btn-outline-primary">🔍</a>
+            <a href="@($"semestres/delete?id={semestres.Id}")" class="btn btn-sm btn-outline-danger">🗑️</a>
+        </div>
     </TemplateColumn>
 </QuickGrid>
 

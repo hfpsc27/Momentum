@@ -22,13 +22,13 @@ public partial class Semestres
 
     public int DtFim { get; set; }
 
-    //[ForeignKey("DtFim")]
+    [ForeignKey("DtFim")]
     //[InverseProperty("SemestresDtFimNavigation")]
-    //public virtual Datas DtFimNavigation { get; set; }
+    public virtual Datas DtFimNavigation { get; set; }
 
-    //[ForeignKey("DtIni")]
+    [ForeignKey("DtIni")]
     //[InverseProperty("SemestresDtIniNavigation")]
-    //public virtual Datas DtIniNavigation { get; set; }
+    public virtual Datas DtIniNavigation { get; set; }
 
     //[InverseProperty("Semestre")]
     //public virtual ICollection<UCsDocente> UCsDocente { get; set; } = new List<UCsDocente>();
