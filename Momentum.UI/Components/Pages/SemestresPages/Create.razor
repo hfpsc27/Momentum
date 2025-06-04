@@ -5,11 +5,9 @@
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Novo semestre</PageTitle>
 
-<h1>Create</h1>
-
-<h2>Semestres</h2>
+<h2>Novo Semestre</h2>
 <hr />
 
 @if (!string.IsNullOrEmpty(ErrorMessage))
@@ -22,8 +20,21 @@
 <div class="row">
     <div class="col-md-4">
         <div class="mb-3">
-            <label for="includeSatuday" class="form-label">Incluir sábados:</label>
-            <InputCheckbox id="IncludeSaturday" @bind-Value="includeSaturday" @onchange="OnIncludeSaturdayChanged" @bind-Value:after="OnIncludeSaturdayChanged" class="form-check-inline" />
+            <label for="includeSaturday" class="form-label">Incluir @DayOfWeek.Saturday:</label>
+            <InputCheckbox id="includeSaturday" @bind-Value="includeSaturday" @onchange="OnIncludeSaturdayChanged" @bind-Value:after="OnIncludeSaturdayChanged" class="form-check-inline" />
+            @if (includeSaturday)
+            {
+                <span class="badge text-bg-success">@includeSaturday</span>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label for="includeSunday" class="form-label">Incluir @DayOfWeek.Sunday:</label>
+            <InputCheckbox id="includeSunday" @bind-Value="includeSunday" @onchange="OnIncludeSaturdayChanged" @bind-Value:after="OnIncludeSaturdayChanged" class="form-check-inline" />
+            @if (includeSunday)
+            {
+                <span class="badge text-bg-success">@includeSunday</span>
+            }
         </div>
 
         <EditForm method="post" Model="Semestres" OnValidSubmit="AddSemestres" FormName="create" Enhance>
@@ -35,15 +46,15 @@
                 <ValidationMessage For="() => Semestres.Descricao" class="text-danger" />
             </div>
             @*<div class="mb-3">
-                <label for="dtini" class="form-label">DtIni:</label>
-                <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
-                <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="dtfim" class="form-label">DtFim:</label>
-                <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
-                <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
-            </div>*@
+                    <label for="dtini" class="form-label">DtIni:</label>
+                    <InputNumber id="dtini" @bind-Value="Semestres.DtIni" class="form-control" />
+                    <ValidationMessage For="() => Semestres.DtIni" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dtfim" class="form-label">DtFim:</label>
+                    <InputNumber id="dtfim" @bind-Value="Semestres.DtFim" class="form-control" />
+                    <ValidationMessage For="() => Semestres.DtFim" class="text-danger" />
+                </div>*@
 
             <div class="mb-3">
                 <label for="dtini" class="form-label">Início:</label>
@@ -84,6 +95,7 @@
     //public bool IncludeSaturday { get; set; } = false;
 
     bool includeSaturday = true;
+    bool includeSunday = false;
 
     [SupplyParameterFromForm]
     private Semestres Semestres { get; set; } = new();
@@ -95,12 +107,16 @@
     {
         using var context = DbFactory.CreateDbContext();
         AllDatas = await context.Datas.ToListAsync();
-        Datas = AllDatas;
+
+        RemoveWeekendDays(includeSaturday, includeSunday);
+
+        //Datas = includeSaturday ? AllDatas : AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
     }
 
     private void OnIncludeSaturdayChanged()
     {
-        Datas = includeSaturday == true ? AllDatas : AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
+        RemoveWeekendDays(includeSaturday, includeSunday);
+        //Datas = includeSaturday == true ? AllDatas : AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
     }
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
@@ -123,6 +139,26 @@
             {
                 ErrorMessage = ex.Message;
             }
+        }
+    }
+
+    private void RemoveWeekendDays(bool includeSaturday, bool includeSunday)
+    {
+        if (includeSaturday is false && includeSunday is false)
+        {
+            Datas = AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday && d.Data.DayOfWeek != DayOfWeek.Sunday).ToList();
+        }
+        else if (includeSaturday is false && includeSunday is true)
+        {
+            Datas = AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
+        }
+        else if (includeSaturday is true && includeSunday is false)
+        {
+            Datas = AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Sunday).ToList();
+        }
+        else if (includeSaturday is true && includeSunday is true)
+        {
+            Datas = AllDatas;
         }
     }
 }
