@@ -23,7 +23,7 @@
     <div class="col-md-4">
         <div class="mb-3">
             <label for="includeSatuday" class="form-label">Incluir sábados:</label>
-            <InputCheckbox id="IncludeSaturday" @bind-Value="IncludeSaturday" @onchange="OnIncludeSaturdayChanged" class="form-check-inline" />
+            <InputCheckbox id="IncludeSaturday" @bind-Value="includeSaturday" @onchange="OnIncludeSaturdayChanged" @bind-Value:after="OnIncludeSaturdayChanged" class="form-check-inline" />
         </div>
 
         <EditForm method="post" Model="Semestres" OnValidSubmit="AddSemestres" FormName="create" Enhance>
@@ -81,7 +81,9 @@
 @code {
     public string ErrorMessage { get; set; } = string.Empty;
 
-    public bool IncludeSaturday { get; set; } = false;
+    //public bool IncludeSaturday { get; set; } = false;
+
+    bool includeSaturday = true;
 
     [SupplyParameterFromForm]
     private Semestres Semestres { get; set; } = new();
@@ -96,11 +98,9 @@
         Datas = AllDatas;
     }
 
-    private void OnIncludeSaturdayChanged(ChangeEventArgs e)
+    private void OnIncludeSaturdayChanged()
     {
-        IncludeSaturday = (bool)e.Value!;
-        Datas = IncludeSaturday ? AllDatas : AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
-        StateHasChanged();
+        Datas = includeSaturday == true ? AllDatas : AllDatas.Where(d => d.Data.DayOfWeek != DayOfWeek.Saturday).ToList();
     }
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
