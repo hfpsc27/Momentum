@@ -1,0 +1,19 @@
+﻿@using MudBlazor
+
+<MudNavMenu>
+    <MudText Typo="Typo.h6" Class="px-4">Opções</MudText>
+    @*<MudText Typo="Typo.body2" Class="px-4 mud-text-secondary">Secondary Text</MudText>*@
+    <MudDivider Class="my-2" />
+    <MudNavGroup Title="Dimensões" Icon="@Icons.Material.Filled.Dataset" Expanded="false">
+        <MudNavLink Icon="@Icons.Material.Filled.DateRange" Href="/datas">Datas</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.Groups" Href="/docentes">Docentes</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.InsertDriveFile" Href="/momentos">Momentos</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/regimes">Regimes</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.CalendarViewMonth" Href="/semestres">Semestres</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.Class" Href="/ucs">Unidades Curriculares</MudNavLink>
+    </MudNavGroup>
+    <MudNavLink Icon="@Icons.Material.Filled.CompareArrows" Href="/ucsdocentes">Associações de UC's'</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.DoneAll" Href="/ucdocentemomentos">Avaliações</MudNavLink>
+    @*<MudNavLink Href="/billing" Disabled="true">Billing</MudNavLink>*@
+</MudNavMenu>
+

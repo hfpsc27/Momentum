@@ -1,45 +1,68 @@
 ﻿@page "/docentes/create"
 @using Microsoft.EntityFrameworkCore
 @using Momentum.UI.Models
+@using MudBlazor
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create</PageTitle>
 
-<h1>Create</h1>
+<MudPaper Class="pa-5 mt-2 d-flex justify-space-between">
+    <MudText Typo="Typo.h5" Align="Align.Left">Novo docente</MudText>
+    @*<MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" href="docentes/create">Novo</MudButton>*@
+</MudPaper>
 
-<h2>Docentes</h2>
-<hr />
-@if (!String.IsNullOrEmpty(ErrorMessage))
-{
-    <div class="alert alert-danger">@ErrorMessage</div>
-}
 
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="@Docentes" OnValidSubmit="AddDocentes" FormName="create" Enhance>
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="mb-3">
-                <label for="nome" class="form-label">Nome:</label>
-                <InputText id="nome" @bind-Value="Docentes.Nome" class="form-control" aria-required="true" />
-                <ValidationMessage For="() => Docentes.Nome" class="text-danger" />
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email:</label>
-                <InputText id="email" @bind-Value="Docentes.Email" class="form-control" aria-required="true" />
-                <ValidationMessage For="() => Docentes.Email" class="text-danger" />
-            </div>
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
-    </div>
-</div>
+<MudPaper Class="pa-5 mt-2">
+    @if (!String.IsNullOrEmpty(ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@ErrorMessage</MudAlert>
+    }
 
-<div>
+    <EditForm method="post" Model="@Docentes" OnValidSubmit="AddDocentes" FormName="create" Enhance>
+        <DataAnnotationsValidator />
+        <MudCardContent>
+            <MudTextField Label="Nome" HelperText="Nome completo"
+                          @bind-Value="Docentes.Nome" For="@(() => Docentes.Nome)"
+                          RequiredError="Nome obrigatório" 
+                          ErrorText="Nome obrigatório"/>
+            <MudTextField Label="Email" Class="mt-3"
+                          @bind-Value="Docentes.Email" For="@(() => Docentes.Email)"
+                          ErrorText="Email obrigatório" />
+        </MudCardContent>
+        <MudCardActions Class="d-flex justify-end">
+            <MudButton Href="/docentes" Variant="Variant.Text" Color="Color.Surface" Class="mr-1">Cancelar</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Gravar</MudButton>
+        </MudCardActions>
+    </EditForm>
+</MudPaper>
+
+@*<div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="@Docentes" OnValidSubmit="AddDocentes" FormName="create" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+                <div class="mb-3">
+                    <label for="nome" class="form-label">Nome:</label>
+                    <InputText id="nome" @bind-Value="Docentes.Nome" class="form-control" aria-required="true" />
+                    <ValidationMessage For="() => Docentes.Nome" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="Docentes.Email" class="form-control" aria-required="true" />
+                    <ValidationMessage For="() => Docentes.Email" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </EditForm>
+        </div>
+    </div>*@
+
+@*<div>
     <a href="/docentes">Back to List</a>
-</div>
+</div>*@
 
 @code {
+    bool success;
     public string ErrorMessage { get; set; } = string.Empty;
 
     [SupplyParameterFromForm]

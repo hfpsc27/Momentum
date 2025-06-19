@@ -1,52 +1,91 @@
 ﻿@page "/docentes"
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
+@*@using Microsoft.AspNetCore.Components.QuickGrid*@
 @using Momentum.UI.Models
 @using Momentum.UI.Data
+@using MudBlazor
 @implements IAsyncDisposable
 @inject IDbContextFactory<Momentum.UI.Data.AppDbContext2> DbFactory
 @rendermode InteractiveServer
 
 <PageTitle>Index</PageTitle>
 
-<h2>Lista de Docentes</h2>
-<hr />
+<MudPaper Class="pa-5 mt-2 d-flex justify-space-between">
+    <MudText Typo="Typo.h5" Align="Align.Left">Docentes</MudText>
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" href="docentes/create">Novo</MudButton>
+</MudPaper>
 
-<p>
-    <a href="docentes/create" class="btn btn-sm btn-outline-primary">Novo docente</a>
-</p>
+<MudPaper Class="pa-5 mt-2">
+    <MudDataGrid T="Docentes" Items="@FilteredDocentes" QuickFilter="@_quickFilter" Elevation="0" Dense="true" Hover="true">
 
-<QuickGrid Class="table table-striped table-sm" Items="FilteredDocentes" Pagination="pagination">
-    <PropertyColumn Property="@(d => d.Nome)" Sortable="true" InitialSortDirection="SortDirection.Ascending" IsDefaultSortColumn="true">
-        <ColumnOptions>
-            <div class="search-box">
-                <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" placeholder="Nome..." class="form-control form-control-sm" />
+        <ToolBarContent>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Pesquisar" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+
+        <Columns>
+            <PropertyColumn Property="x => x.Id" />
+            <PropertyColumn Property="x => x.Nome" />
+            <PropertyColumn Property="x => x.Email" />
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate Context="docente">
+                    <MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
+                        <MudLink Href="@($"docentes/edit?id={docente.Item.Id}")">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Surface"></MudIconButton>
+                        </MudLink>
+                        <MudLink Href="@($"docentes/details?id={docente.Item.Id}")">
+                            <MudIconButton Icon="@Icons.Material.Filled.FileCopy" Color="Color.Surface"></MudIconButton>
+                        </MudLink>
+                        <MudLink Href="@($"docentes/delete?id={docente.Item.Id}")">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"></MudIconButton>
+                        </MudLink>
+                    </MudButtonGroup>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Docentes" RowsPerPageString="Linhas por página" />
+        </PagerContent>
+    </MudDataGrid>
+</MudPaper>
+
+@*<p>
+        <a href="docentes/create" class="btn btn-sm btn-outline-primary">Novo docente</a>
+    </p>*@
+
+@*<QuickGrid Class="table table-striped table-sm" Items="FilteredDocentes" Pagination="pagination">
+        <PropertyColumn Property="@(d => d.Nome)" Sortable="true" InitialSortDirection="SortDirection.Ascending" IsDefaultSortColumn="true">
+            <ColumnOptions>
+                <div class="search-box">
+                    <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" placeholder="Nome..." class="form-control form-control-sm" />
+                </div>
+            </ColumnOptions>
+        </PropertyColumn>
+
+        <PropertyColumn Property="@(d => d.Email)" />
+
+        <TemplateColumn Context="docentes">
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <a href="@($"docentes/edit?id={docentes.Id}")" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="@($"docentes/details?id={docentes.Id}")" class="btn btn-sm btn-outline-primary">Detalhe</a>
+                <a href="@($"docentes/delete?id={docentes.Id}")" class="btn btn-sm btn-outline-danger">Apagar</a>
             </div>
-        </ColumnOptions>
-    </PropertyColumn>
+        </TemplateColumn>
+    </QuickGrid>*@
 
-    <PropertyColumn Property="@(d => d.Email)" />
-
-    <TemplateColumn Context="docentes">
-        <div class="btn-group" role="group" aria-label="Basic example">
-            <a href="@($"docentes/edit?id={docentes.Id}")" class="btn btn-sm btn-outline-primary">Editar</a>
-            <a href="@($"docentes/details?id={docentes.Id}")" class="btn btn-sm btn-outline-primary">Detalhe</a>
-            <a href="@($"docentes/delete?id={docentes.Id}")" class="btn btn-sm btn-outline-danger">Apagar</a>
-        </div>
-    </TemplateColumn>
-</QuickGrid>
-
-@if (FilteredDocentes.Count() > 35)
-{
-    <Paginator State="pagination" />
-}
+@*@if (FilteredDocentes.Count() > 35)
+    {
+        <Paginator State="pagination" />
+    }*@
 
 @code {
+    private string _searchString;
     private AppDbContext2 context = default!;
     IQueryable<Docentes> Docentes = null!;
 
     string nameFilter = string.Empty;
-    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    //PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
 
     protected override void OnInitialized()
     {
@@ -66,6 +105,21 @@
             return result;
         }
     }
+
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<Docentes, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Nome.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

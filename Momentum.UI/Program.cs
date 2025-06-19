@@ -2,10 +2,13 @@ using Momentum.UI.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Momentum.UI.Data;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContextFactory<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("AppDbContext") ?? throw new InvalidOperationException("Connection string 'AppDbContext' not found.")));
+
+//builder.Services.AddDbContextFactory<AppDbContext>(options =>
+//    options.UseSqlite(builder.Configuration.GetConnectionString("AppDbContext") ?? throw new InvalidOperationException("Connection string 'AppDbContext' not found.")));
+
 builder.Services.AddDbContextFactory<AppDbContext2>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("AppDbContext2") ?? throw new InvalidOperationException("Connection string 'AppDbContext2' not found.")));
 
@@ -16,6 +19,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 
